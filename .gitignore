@@ -1,0 +1,18 @@
+# Python cache
+__pycache__/
+*.pyc
+
+# Virtual environment
+.venv/
+env/
+*.env
+
+# Models / pickles
+*.keras
+*.h5
+*.pkl
+
+# IDE / OS files
+*.idea/
+.DS_Store
+Thumbs.db

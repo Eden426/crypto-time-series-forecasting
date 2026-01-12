@@ -19,7 +19,7 @@ app.add_middleware(
 def predict_crypto(request: PredictedRequest):
     symbol = request.symbol.upper()
     try:
-        last_60_days, dates = fetch_last_60_days(symbol)  # make sure fetcher returns dates
+        last_60_days = fetch_last_60_days(symbol)  # make sure fetcher returns dates
     except Exception as e:
         raise HTTPException(status_code=503, detail=str(e))
 
