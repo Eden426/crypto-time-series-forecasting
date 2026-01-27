@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Crypto Time Series Forecasting</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+
+  <body>
+    <main class="container">
+      <!-- Header Section -->
+      <header class="header">
+        <h1 class="title">Crypto Price Predictor</h1>
+      
+      </header>
+
+      <!-- Introduction Section -->
+      <section class="introduction">
+        <div class="intro-content">
+          <h2>About Crypto Price Predictor</h2>
+          <div class="intro-essay">
+            <p>
+              Crypto Price Predictor is a machine-learning project that uses GRU neural networks and FastAPI to analyze 
+              historical cryptocurrency prices and predict short-term trends. The system operates on a <strong>60-day historical 
+              window</strong>, processing the past two months of OHLC price data through a trained deep learning model to 
+              generate predictions for the <strong>next day's closing price</strong>.
+            </p>
+            <p>
+              To ensure accuracy, the system integrates with <strong>CoinGecko's live data API</strong>, fetching real-time 
+              market data to maintain the most current 60-day window. This live data integration ensures predictions are 
+              based on the latest market conditions and recent price movements, demonstrating how machine learning can be 
+              applied to financial forecasting for educational purposes.
+            </p>
+          </div>
+          <div class="features">
+            <div class="features-left">
+              <div class="feature-item">GRU Neural Networks</div>
+              <div class="feature-item">60-Day Window</div>
+              <div class="feature-item">Next-Day Prediction</div>
+            </div>
+            <div class="features-right">
+              <div class="feature-item">FastAPI Backend</div>
+              <div class="feature-item">CoinGecko Integration</div>
+              <div class="feature-item">Live Data Updates</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Crypto Selection Section -->
+      <section class="form">
+        <h3 class="section-title">Select Cryptocurrency</h3>
+        <p class="section-description">Choose a cryptocurrency to generate predictions</p>
+
+        <div class="crypto-buttons" role="group" aria-label="Cryptocurrency selection">
+          <button class="crypto-btn" data-symbol="BTC">
+            <span class="crypto-icon">₿</span>
+            <div class="crypto-info">
+              <span class="crypto-name">Bitcoin</span>
+              <span class="crypto-symbol">BTC</span>
+            </div>
+          </button>
+          <button class="crypto-btn" data-symbol="ETH">
+            <span class="crypto-icon">Ξ</span>
+            <div class="crypto-info">
+              <span class="crypto-name">Ethereum</span>
+              <span class="crypto-symbol">ETH</span>
+            </div>
+          </button>
+          <button class="crypto-btn" data-symbol="LTC">
+            <span class="crypto-icon">Ł</span>
+            <div class="crypto-info">
+              <span class="crypto-name">Litecoin</span>
+              <span class="crypto-symbol">LTC</span>
+            </div>
+          </button>
+          <button class="crypto-btn" data-symbol="XRP">
+            <span class="crypto-icon">✕</span>
+            <div class="crypto-info">
+              <span class="crypto-name">Ripple</span>
+              <span class="crypto-symbol">XRP</span>
+            </div>
+          </button>
+        </div>
+      </section>
+
+      <!-- Prediction Action Section -->
+      <section class="prediction-action">
+        <div class="action-wrapper">
+          <p class="action-hint">Ready to predict? Click the button below when you're ready.</p>
+          <button id="predictBtn" class="predict-btn" type="button" disabled>
+            <span class="btn-text">Predict</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Results Section -->
+      <section class="result">
+        <h3 class="section-title">Prediction Results</h3>
+        <div class="result-cards">
+          <div class="result-card">
+            <div class="result-label">Predicted Close</div>
+            <div class="result-value" id="prediction">—</div>
+          </div>
+          <div class="result-card">
+            <div class="result-label">Confidence</div>
+            <div class="result-value" id="confidence">—</div>
+          </div>
+        </div>
+      </section>
+
+  
+
+      <!-- Error Message -->
+      <p id="error" class="error" role="alert"></p>
+
+      <!-- Loading Indicator -->
+      <div id="loading" class="loading" hidden>
+        <div class="loading-spinner"></div>
+        <p>Predicting...</p>
+      </div>
+    </main>
+
+    <script src="index.js"></script>
+  </body>
+</html>
