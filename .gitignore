@@ -1,0 +1,21 @@
+# Virtual environments
+venv/
+.venv/
+.venv310/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Environment variables
+.env
+
+# Model artifacts (optional – keep if large)
+# models/*.keras
+# models/*.pkl
+
+# OS files
+.DS_Store
+Thumbs.db
+.idea/
