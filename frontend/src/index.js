@@ -1,3 +1,18 @@
+// ----------------------
+// API Configuration
+// ----------------------
+// Replace this URL with your deployed Render backend URL (without trailing slash)
+const PRODUCTION_API_URL = "https://crypto-forecasting-backend.onrender.com";
+
+const isLocalhost =
+  window.location.hostname === "localhost" ||
+  window.location.hostname === "127.0.0.1" ||
+  window.location.protocol === "file:";
+
+const API_BASE_URL = (
+  window.CRYPTO_API_URL || (isLocalhost ? "http://127.0.0.1:8000" : PRODUCTION_API_URL)
+).replace(/\/+$/, "");
+
 // Selected cryptocurrency symbol
 let selectedSymbol = null;
 
@@ -53,7 +68,7 @@ async function predict() {
   predictBtn.disabled = true;
 
   try {
-    const response = await fetch("http://127.0.0.1:8000/predict", {
+    const response = await fetch(`${API_BASE_URL}/predict`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ symbol: selectedSymbol }),

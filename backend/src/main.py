@@ -1,19 +1,34 @@
+import os
 from fastapi import FastAPI, HTTPException
 from starlette.middleware.cors import CORSMiddleware
 
 from .schema import PredictedRequest, PredictionResponse
 from .data_fetcher import fetch_last_60_days
-from .prediction_engine import predict_next_close, calculate_confidence
+from .prediction_engine import predict_next_close, calculate_confidence, HF_REPO_ID
 
 app = FastAPI(title="Crypto Prediction API")
 
+raw_origins = os.getenv("ALLOWED_ORIGINS", "*")
+allowed_origins = [o.strip() for o in raw_origins.split(",") if o.strip()]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],        # allow all frontends (OK for dev)
-    allow_credentials=True,
-    allow_methods=["*"],        # allow POST, GET, OPTIONS, etc.
-    allow_headers=["*"],        # allow JSON headers
+    allow_origins=allowed_origins,
+    allow_credentials=allowed_origins != ["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
+
+
+@app.get("/")
+@app.get("/health")
+def health_check():
+    return {
+        "status": "ok",
+        "service": "Crypto Prediction API",
+        "model_source": f"hf://{HF_REPO_ID}" if HF_REPO_ID else "local",
+    }
+
 
 @app.post("/predict", response_model=PredictionResponse)
 def predict_crypto(request: PredictedRequest):

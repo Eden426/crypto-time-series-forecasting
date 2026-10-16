@@ -1,28 +1,59 @@
+import os
+os.environ.setdefault("TF_CPP_MIN_LOG_LEVEL", "2")
+
 import numpy as np
 import pickle
 from keras.models import load_model
 from pathlib import Path
 import warnings
 
-BASE_DIR = Path(__file__).resolve().parents[2]  # adjust if needed
+BASE_DIR = Path(__file__).resolve().parents[2]
 MODELS_DIR = BASE_DIR / "models"
+
+HF_REPO_ID = os.getenv("HF_REPO_ID", "Eden-N/crypto-time-series-gru").strip()
+HF_TOKEN = os.getenv("HF_TOKEN", "").strip() or None
 
 MODELS = {}
 SCALERS = {}
 
 FEATURE_CLOSE = 3  # OHLC → close index
 
+
+def _resolve_asset_paths(symbol: str) -> tuple[Path, Path]:
+    """Resolve model and scaler paths from Hugging Face Hub (if HF_REPO_ID is set) or local disk."""
+    model_filename = f"{symbol}_gru.keras"
+    scaler_filename = f"{symbol}_scaler.pkl"
+
+    if HF_REPO_ID:
+        from huggingface_hub import hf_hub_download
+
+        model_path = Path(
+            hf_hub_download(repo_id=HF_REPO_ID, filename=model_filename, token=HF_TOKEN)
+        )
+        scaler_path = Path(
+            hf_hub_download(repo_id=HF_REPO_ID, filename=scaler_filename, token=HF_TOKEN)
+        )
+        return model_path, scaler_path
+
+    model_path = MODELS_DIR / model_filename
+    scaler_path = MODELS_DIR / scaler_filename
+
+    if not model_path.exists():
+        raise FileNotFoundError(
+            f"Model not found at {model_path}. Set HF_REPO_ID env var to load from Hugging Face Hub."
+        )
+    if not scaler_path.exists():
+        raise FileNotFoundError(
+            f"Scaler not found at {scaler_path}. Set HF_REPO_ID env var to load from Hugging Face Hub."
+        )
+
+    return model_path, scaler_path
+
+
 def load_assets(symbol: str):
     """Load model and scaler for a given symbol."""
     if symbol not in MODELS:
-        model_path = MODELS_DIR / f"{symbol}_gru.keras"
-        scaler_path = MODELS_DIR / f"{symbol}_scaler.pkl"
-
-        if not model_path.exists():
-            raise FileNotFoundError(f"Model not found: {model_path}")
-        if not scaler_path.exists():
-            raise FileNotFoundError(f"Scaler not found: {scaler_path}")
-
+        model_path, scaler_path = _resolve_asset_paths(symbol)
         MODELS[symbol] = load_model(model_path)
         with open(scaler_path, "rb") as f:
             SCALERS[symbol] = pickle.load(f)

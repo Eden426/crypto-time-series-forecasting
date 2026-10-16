@@ -1,0 +1,8 @@
+{
+  "version": 2,
+  "rewrites": [
+    { "source": "/", "destination": "/src/index.html" },
+    { "source": "/style.css", "destination": "/src/style.css" },
+    { "source": "/index.js", "destination": "/src/index.js" }
+  ]
+}
