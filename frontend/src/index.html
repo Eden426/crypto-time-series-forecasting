@@ -12,13 +12,6 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="sky" aria-hidden="true">
-    <svg class="sky-wave" viewBox="0 0 1440 520" preserveAspectRatio="none">
-      <path class="wave-a" d="M0,320 C180,260 320,380 520,300 C720,220 880,160 1080,220 C1240,268 1360,300 1440,280 L1440,520 L0,520 Z" />
-      <path class="wave-b" d="M0,360 C220,300 400,420 620,340 C840,260 980,200 1180,260 C1320,300 1400,320 1440,310 L1440,520 L0,520 Z" />
-    </svg>
-  </div>
-
   <header class="site-header">
     <a class="brand" href="#top" aria-label="Meridian home">
       <span class="brand-mark" aria-hidden="true">
@@ -37,28 +30,14 @@
   </header>
 
   <main id="top">
-    <section class="hero">
-      <p class="eyebrow">Next-day close · GRU · 60-day window</p>
-      <h1>Tomorrow’s close,<br />drawn from<br /><em>today’s path.</em></h1>
-      <p class="hero-lede">Meridian reads the last sixty daily closes and estimates the next one — for Bitcoin, Ethereum, Litecoin, and Ripple.</p>
-      <svg class="horizon" viewBox="0 0 640 88" aria-hidden="true">
-        <path class="horizon-past" d="M0 58 C40 52 72 66 110 48 C148 30 180 42 220 36 C260 30 292 50 332 44 C372 38 404 20 448 28" />
-        <path class="horizon-future" d="M448 28 C500 38 560 18 640 12" />
-        <circle cx="448" cy="28" r="4.5" class="horizon-now" />
-        <circle cx="640" cy="12" r="4.5" class="horizon-next" />
-        <text x="430" y="78">today</text>
-        <text x="592" y="78">tomorrow</text>
-      </svg>
-      <div class="hero-actions">
-        <a class="cta-primary" href="#workspace">Open forecast</a>
-        <span class="cta-note">USD close estimate · not financial advice</span>
-      </div>
+    <section class="page-intro" aria-labelledby="pageTitle">
+      <h1 id="pageTitle">Crypto forecast</h1>
+      <p>Choose a coin to estimate its next daily close.</p>
     </section>
 
     <section class="workspace" id="workspace" aria-label="Forecast workspace">
       <div class="workspace-intro">
-        <h2>Pick an asset</h2>
-        <p>Select a cryptocurrency, then generate a next-day close estimate.</p>
+        <h2>1. Select a cryptocurrency</h2>
       </div>
 
       <div class="asset-row" role="group" aria-label="Cryptocurrency selection">
@@ -85,9 +64,9 @@
       </div>
 
       <div class="run-bar">
-        <p class="selection-hint" id="selectionHint">Choose an asset to begin.</p>
+        <p class="selection-hint" id="selectionHint">Choose an asset to continue.</p>
         <button class="run-btn" id="predictBtn" type="button" disabled>
-          Generate forecast
+          Get forecast
           <span aria-hidden="true">→</span>
         </button>
       </div>
