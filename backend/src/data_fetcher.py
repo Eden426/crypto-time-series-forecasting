@@ -12,6 +12,7 @@ COINGECKO_IDS = {
     "XRP": "ripple",
 }
 BINANCE_SYMBOLS = {symbol: f"{symbol}USDT" for symbol in COINGECKO_IDS}
+COINBASE_PRODUCTS = {symbol: f"{symbol}-USD" for symbol in COINGECKO_IDS}
 HEADERS = {"User-Agent": "crypto-prediction-api/1.0"}
 CACHE_TTL_SECONDS = 300
 _CACHE: dict[str, tuple[float, np.ndarray]] = {}
@@ -60,8 +61,31 @@ def _fetch_binance(symbol: str) -> np.ndarray:
     return _validate_ohlc(rows)
 
 
+def _fetch_coinbase(symbol: str) -> np.ndarray:
+    """Fetch daily USD candles from Coinbase Exchange as a second fallback."""
+    now = datetime.now(timezone.utc)
+    start = datetime.fromtimestamp(now.timestamp() - 70 * 24 * 60 * 60, tz=timezone.utc)
+    response = requests.get(
+        f"https://api.exchange.coinbase.com/products/{COINBASE_PRODUCTS[symbol]}/candles",
+        params={"granularity": 86400, "start": start.isoformat(), "end": now.isoformat()},
+        headers={**HEADERS, "Accept": "application/json"},
+        timeout=12,
+    )
+    if response.status_code != 200:
+        raise RuntimeError(f"Coinbase market data returned HTTP {response.status_code}.")
+
+    # Coinbase returns [time, low, high, open, close, volume] newest first.
+    candles = sorted(response.json(), key=lambda candle: candle[0])
+    rows = [
+        [float(candle[3]), float(candle[2]), float(candle[1]), float(candle[4])]
+        for candle in candles
+        if len(candle) >= 5
+    ][-60:]
+    return _validate_ohlc(rows)
+
+
 def fetch_last_60_days(symbol: str) -> np.ndarray:
-    """Return 60 daily OHLC rows, caching briefly and falling back to Binance."""
+    """Return 60 daily OHLC rows, using cached data and provider fallbacks."""
     symbol = symbol.upper()
     if symbol not in COINGECKO_IDS:
         raise ValueError(f"Unsupported symbol: {symbol}")
@@ -72,15 +96,17 @@ def fetch_last_60_days(symbol: str) -> np.ndarray:
         if cached and cached[0] > monotonic():
             return cached[1].copy()
 
-        try:
-            result = _fetch_coingecko(symbol)
-        except Exception as primary_error:
+        errors = []
+        last_error = None
+        for provider in (_fetch_coingecko, _fetch_binance, _fetch_coinbase):
             try:
-                result = _fetch_binance(symbol)
-            except Exception as fallback_error:
-                raise RuntimeError(
-                    f"CoinGecko failed ({primary_error}); Binance fallback failed ({fallback_error})."
-                ) from fallback_error
+                result = provider(symbol)
+                break
+            except Exception as error:
+                last_error = error
+                errors.append(f"{provider.__name__.removeprefix('_fetch_')} failed ({error})")
+        else:
+            raise RuntimeError("; ".join(errors)) from last_error
 
         _CACHE[symbol] = (monotonic() + CACHE_TTL_SECONDS, result.copy())
         return result
