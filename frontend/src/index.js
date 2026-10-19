@@ -1,135 +1,104 @@
-// ----------------------
-// API Configuration
-// ----------------------
-// Replace this URL with your deployed Render backend URL (without trailing slash)
-const PRODUCTION_API_URL = "https://crypto-forecasting-backend.onrender.com";
-
-const isLocalhost =
-  window.location.hostname === "localhost" ||
-  window.location.hostname === "127.0.0.1" ||
-  window.location.protocol === "file:";
-
-const API_BASE_URL = (
-  window.CRYPTO_API_URL || (isLocalhost ? "http://127.0.0.1:8000" : PRODUCTION_API_URL)
-).replace(/\/+$/, "");
-
-// Selected cryptocurrency symbol
+const LOCAL_API_URL = "http://127.0.0.1:8000";
+const DEFAULT_API_URL = "https://crypto-time-series-forecasting.onrender.com";
+let apiBaseUrl = null;
 let selectedSymbol = null;
 
-document.addEventListener("DOMContentLoaded", () => {
+const coinNames = { BTC: "Bitcoin", ETH: "Ethereum", LTC: "Litecoin", XRP: "Ripple" };
+
+document.addEventListener("DOMContentLoaded", async () => {
   setupCryptoButtons();
-  setupPredictButton();
-  hideLoading();
+  document.getElementById("predictBtn").addEventListener("click", predict);
+  await configureApi();
 });
 
-// ----------------------
-// Crypto button handling
-// ----------------------
-function setupCryptoButtons() {
-  const buttons = document.querySelectorAll(".crypto-btn");
-  const predictBtn = document.getElementById("predictBtn");
-
-  buttons.forEach((btn) => {
-    btn.addEventListener("click", () => {
-      buttons.forEach((b) => b.classList.remove("active"));
-      btn.classList.add("active");
-
-      selectedSymbol = btn.dataset.symbol;
-      clearResults();
-      predictBtn.disabled = false;
-    });
-  });
-}
-
-// ----------------------
-// Predict button handling
-// ----------------------
-function setupPredictButton() {
-  const predictBtn = document.getElementById("predictBtn");
-  predictBtn.addEventListener("click", predict);
-}
-
-// ----------------------
-// Prediction logic
-// ----------------------
-async function predict() {
-  if (!selectedSymbol) {
-    showError("Please select a cryptocurrency first.");
-    return;
-  }
-
-  const predictionEl = document.getElementById("prediction");
-  const confidenceEl = document.getElementById("confidence");
-  const loadingEl = document.getElementById("loading");
-  const predictBtn = document.getElementById("predictBtn");
-
-  clearResults();
-  showLoading();
-  predictBtn.disabled = true;
-
+async function configureApi() {
+  const isLocal = ["localhost", "127.0.0.1"].includes(window.location.hostname) || window.location.protocol === "file:";
+  const queryUrl = new URLSearchParams(window.location.search).get("api");
+  const override = window.CRYPTO_API_URL || queryUrl;
   try {
-    const response = await fetch(`${API_BASE_URL}/predict`, {
+    const response = await fetch("/api/config", { headers: { Accept: "application/json" } });
+    if (response.ok) {
+      const config = await response.json();
+      apiBaseUrl = config.apiBaseUrl || null;
+    }
+  } catch (_) {
+    // The static frontend may be served outside Vercel; use the local fallback below.
+  }
+  apiBaseUrl = normalizeUrl(override || apiBaseUrl || (isLocal ? LOCAL_API_URL : DEFAULT_API_URL));
+  try {
+    const response = await fetch(`${apiBaseUrl}/health`, { headers: { Accept: "application/json" } });
+    if (!response.ok) throw new Error(`Backend health check returned HTTP ${response.status}.`);
+    const status = document.querySelector(".top-status");
+    status.classList.add("connected");
+    document.getElementById("statusText").textContent = "Forecast engine online";
+  } catch (error) {
+    const status = document.querySelector(".top-status");
+    status.classList.add("offline");
+    document.getElementById("statusText").textContent = "Forecast engine unavailable";
+    if (!override && !apiBaseUrl.includes("127.0.0.1")) {
+      showError("The configured API could not be reached. In Vercel, set CRYPTO_API_URL to your Render service URL (for example, https://your-service.onrender.com), then redeploy.");
+    }
+  }
+}
+
+function normalizeUrl(value) {
+  return String(value).trim().replace(/\/+$/, "");
+}
+
+function setupCryptoButtons() {
+  const buttons = [...document.querySelectorAll(".crypto-card")];
+  buttons.forEach((button) => button.addEventListener("click", () => {
+    buttons.forEach((item) => item.setAttribute("aria-pressed", String(item === button)));
+    selectedSymbol = button.dataset.symbol;
+    clearResults();
+    document.getElementById("predictBtn").disabled = false;
+    document.getElementById("selectionHint").textContent = `${coinNames[selectedSymbol]} selected · ready to generate a next-day estimate.`;
+  }));
+}
+
+async function predict() {
+  if (!selectedSymbol || !apiBaseUrl) return showError("Choose a cryptocurrency and make sure the forecast engine is online.");
+  const button = document.getElementById("predictBtn");
+  button.disabled = true;
+  document.getElementById("loading").hidden = false;
+  clearResults();
+  try {
+    const response = await fetch(`${apiBaseUrl}/predict`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
       body: JSON.stringify({ symbol: selectedSymbol }),
     });
-
+    const data = await response.json().catch(() => ({}));
     if (!response.ok) {
-      throw new Error("Backend error");
+      const detail = typeof data.detail === "string" ? data.detail : JSON.stringify(data.detail || data);
+      throw new Error(detail ? `API error (${response.status}): ${detail}` : `API error (${response.status}).`);
     }
-
-    const data = await response.json();
-
-    const formattedPrice = new Intl.NumberFormat("en-US", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(parseFloat(data.predicted_close));
-
-    predictionEl.textContent = data.predicted_close
-      ? `$${formattedPrice}`
-      : "—";
-
-    confidenceEl.textContent = data.confidence
-      ? `${Number(data.confidence).toFixed(1)}%`
-      : "—";
-  } catch (err) {
-    showError("Failed to get prediction. Check backend server.");
-    predictionEl.textContent = "Error";
+    const price = Number(data.predicted_close);
+    const confidence = Number(data.confidence);
+    if (!Number.isFinite(price) || !Number.isFinite(confidence)) throw new Error("The API returned an invalid prediction. Check the backend logs.");
+    document.getElementById("prediction").textContent = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(price);
+    document.getElementById("confidence").textContent = `${confidence.toFixed(1)}%`;
+    document.getElementById("confidenceBar").style.width = `${Math.max(0, Math.min(100, confidence))}%`;
+    document.getElementById("predictionFoot").textContent = `${coinNames[data.symbol] || data.symbol} · USD estimate · next daily close`;
+    document.getElementById("forecastDate").textContent = "NEXT DAY";
+  } catch (error) {
+    showError(`${error.message} API: ${apiBaseUrl}`);
   } finally {
-    hideLoading();
-    predictBtn.disabled = false;
+    document.getElementById("loading").hidden = true;
+    button.disabled = false;
   }
 }
 
-// ----------------------
-// Helper functions
-// ----------------------
 function clearResults() {
   document.getElementById("prediction").textContent = "—";
   document.getElementById("confidence").textContent = "—";
-  hideError();
-}
-
-function showLoading() {
-  const el = document.getElementById("loading");
-  el.style.display = "flex";
-}
-
-function hideLoading() {
-  const el = document.getElementById("loading");
-  el.style.display = "none";
+  document.getElementById("confidenceBar").style.width = "0%";
+  document.getElementById("predictionFoot").textContent = "USD estimate · next daily close";
+  document.getElementById("error").hidden = true;
 }
 
 function showError(message) {
-  const el = document.getElementById("error");
-  el.textContent = message;
-  el.style.display = "block";
-
-  setTimeout(hideError, 4000);
-}
-
-function hideError() {
-  const el = document.getElementById("error");
-  el.textContent = "";
-  el.style.display = "none";
+  const error = document.getElementById("error");
+  error.textContent = message;
+  error.hidden = false;
 }

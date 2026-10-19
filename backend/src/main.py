@@ -1,22 +1,28 @@
+import logging
 import os
+
 from fastapi import FastAPI, HTTPException
 from starlette.middleware.cors import CORSMiddleware
 
-from .schema import PredictedRequest, PredictionResponse
 from .data_fetcher import fetch_last_60_days
-from .prediction_engine import predict_next_close, calculate_confidence, HF_REPO_ID
+from .prediction_engine import (
+    HF_REPO_ID,
+    calculate_confidence,
+    predict_next_close,
+)
+from .schema import PredictedRequest, PredictionResponse
 
+logger = logging.getLogger(__name__)
 app = FastAPI(title="Crypto Prediction API")
 
 raw_origins = os.getenv("ALLOWED_ORIGINS", "*")
-allowed_origins = [o.strip() for o in raw_origins.split(",") if o.strip()]
-
+allowed_origins = [origin.strip() for origin in raw_origins.split(",") if origin.strip()]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
     allow_credentials=allowed_origins != ["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["Content-Type", "Accept"],
 )
 
 
@@ -34,16 +40,18 @@ def health_check():
 def predict_crypto(request: PredictedRequest):
     symbol = request.symbol.upper()
     try:
-        last_60_days = fetch_last_60_days(symbol)  # make sure fetcher returns dates
-    except Exception as e:
-        raise HTTPException(status_code=503, detail=str(e))
-
-    predicted = predict_next_close(symbol, last_60_days)
-    confidence = calculate_confidence(last_60_days)
-
-    return PredictionResponse(
-        symbol=symbol,
-        predicted_close=round(predicted, 2),
-        confidence=confidence,
-        description=f"Next-day close prediction for {symbol}",
-    )
+        daily_ohlc = fetch_last_60_days(symbol)
+        predicted = predict_next_close(symbol, daily_ohlc)
+        confidence = calculate_confidence(daily_ohlc)
+        return PredictionResponse(
+            symbol=symbol,
+            predicted_close=round(predicted, 2),
+            confidence=confidence,
+            description=f"Next-day close prediction for {symbol}",
+        )
+    except Exception as exc:
+        logger.exception("Prediction failed for %s", symbol)
+        raise HTTPException(
+            status_code=503,
+            detail=f"Prediction failed for {symbol}: {exc}",
+        ) from exc

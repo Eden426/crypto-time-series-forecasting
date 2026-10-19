@@ -35,7 +35,7 @@ The repository includes both a [`render.yaml`](./render.yaml) Blueprint and a [`
 2. Log in to [Render](https://dashboard.render.com/) → click **New +** → **Blueprint**.
 3. Connect your GitHub repository (`Crypto-Time-Series-Forecasting`).
 4. Render will detect `render.yaml` and prompt you for:
-   - `HF_REPO_ID`: Set this to `<YOUR_HF_USERNAME>/crypto-time-series-gru` (from Step 1).
+   - `HF_REPO_ID`: Set this to `Eden-N/crypto-time-series-gru` (or your own public model repository).
 5. Click **Apply** to deploy.
 
 ### Option B: Deploy via Render Web Service (Manual)
@@ -48,18 +48,21 @@ The repository includes both a [`render.yaml`](./render.yaml) Blueprint and a [`
    - `PYTHON_VERSION` = `3.11.9`
    - `HF_REPO_ID` = `<YOUR_HF_USERNAME>/crypto-time-series-gru`
    - `ALLOWED_ORIGINS` = `*` (or your Vercel URL once deployed)
-4. Once deployed, copy your Render service URL (e.g. `https://crypto-forecasting-backend.onrender.com`) and verify it by opening:
+4. Once deployed, copy your Render service URL (e.g. `https://crypto-time-series-forecasting.onrender.com`) and verify it by opening:
    - `https://<your-render-service>.onrender.com/health`
 
 ---
 
 ## Step 3: Deploy the Frontend to Vercel
 
-1. Open [`frontend/src/index.js`](./frontend/src/index.js) and ensure `PRODUCTION_API_URL` at the top of the file matches your Render backend URL:
-   ```js
-   const PRODUCTION_API_URL = "https://crypto-forecasting-backend.onrender.com";
-   ```
-   *(If your Render service has a different subdomain, update this line, commit, and push to GitHub.)*
+1. Set `CRYPTO_API_URL` in the Vercel project environment variables to your Render backend URL (see the environment variable section below).
 2. Log in to [Vercel](https://vercel.com/new) and import your GitHub repository.
 3. You can deploy with **default settings** (root [`vercel.json`](./vercel.json) automatically routes `/`, `/style.css`, and `/index.js` to `frontend/src/`), **or** set the **Root Directory** to `frontend/src`.
 4. Click **Deploy**. Your frontend is now live on Vercel and connected to your Render FastAPI backend and Hugging Face Hub models!
+## Vercel environment variable
+
+The static frontend reads the backend address from a Vercel function at `/api/config`. The frontend defaults to the current Render URL. In Vercel project settings, set this variable for Production (and Preview if needed) to override it:
+
+- `CRYPTO_API_URL` = the Render web service's public base URL, such as `https://your-render-service.onrender.com` (no trailing slash)
+
+Redeploy the Vercel project after saving the variable. The deployed page checks `/health` on startup and displays the backend's response when a prediction fails. For local development, the frontend defaults to `http://127.0.0.1:8000`.

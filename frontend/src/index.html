@@ -1,127 +1,37 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Crypto Time Series Forecasting</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="style.css" />
-  </head>
-
-  <body>
-    <main class="container">
-      <!-- Header Section -->
-      <header class="header">
-        <h1 class="title">Crypto Price Predictor</h1>
-      
-      </header>
-
-      <!-- Introduction Section -->
-      <section class="introduction">
-        <div class="intro-content">
-          <h2>About Crypto Price Predictor</h2>
-          <div class="intro-essay">
-            <p>
-              Crypto Price Predictor is a machine-learning project that uses GRU neural networks and FastAPI to analyze 
-              historical cryptocurrency prices and predict short-term trends. The system operates on a <strong>60-day historical 
-              window</strong>, processing the past two months of OHLC price data through a trained deep learning model to 
-              generate predictions for the <strong>next day's closing price</strong>.
-            </p>
-            <p>
-              To ensure accuracy, the system integrates with <strong>CoinGecko's live data API</strong>, fetching real-time 
-              market data to maintain the most current 60-day window. This live data integration ensures predictions are 
-              based on the latest market conditions and recent price movements, demonstrating how machine learning can be 
-              applied to financial forecasting for educational purposes.
-            </p>
-          </div>
-          <div class="features">
-            <div class="features-left">
-              <div class="feature-item">GRU Neural Networks</div>
-              <div class="feature-item">60-Day Window</div>
-              <div class="feature-item">Next-Day Prediction</div>
-            </div>
-            <div class="features-right">
-              <div class="feature-item">FastAPI Backend</div>
-              <div class="feature-item">CoinGecko Integration</div>
-              <div class="feature-item">Live Data Updates</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Crypto Selection Section -->
-      <section class="form">
-        <h3 class="section-title">Select Cryptocurrency</h3>
-        <p class="section-description">Choose a cryptocurrency to generate predictions</p>
-
-        <div class="crypto-buttons" role="group" aria-label="Cryptocurrency selection">
-          <button class="crypto-btn" data-symbol="BTC">
-            <span class="crypto-icon">₿</span>
-            <div class="crypto-info">
-              <span class="crypto-name">Bitcoin</span>
-              <span class="crypto-symbol">BTC</span>
-            </div>
-          </button>
-          <button class="crypto-btn" data-symbol="ETH">
-            <span class="crypto-icon">Ξ</span>
-            <div class="crypto-info">
-              <span class="crypto-name">Ethereum</span>
-              <span class="crypto-symbol">ETH</span>
-            </div>
-          </button>
-          <button class="crypto-btn" data-symbol="LTC">
-            <span class="crypto-icon">Ł</span>
-            <div class="crypto-info">
-              <span class="crypto-name">Litecoin</span>
-              <span class="crypto-symbol">LTC</span>
-            </div>
-          </button>
-          <button class="crypto-btn" data-symbol="XRP">
-            <span class="crypto-icon">✕</span>
-            <div class="crypto-info">
-              <span class="crypto-name">Ripple</span>
-              <span class="crypto-symbol">XRP</span>
-            </div>
-          </button>
-        </div>
-      </section>
-
-      <!-- Prediction Action Section -->
-      <section class="prediction-action">
-        <div class="action-wrapper">
-          <p class="action-hint">Ready to predict? Click the button below when you're ready.</p>
-          <button id="predictBtn" class="predict-btn" type="button" disabled>
-            <span class="btn-text">Predict</span>
-          </button>
-        </div>
-      </section>
-
-      <!-- Results Section -->
-      <section class="result">
-        <h3 class="section-title">Prediction Results</h3>
-        <div class="result-cards">
-          <div class="result-card">
-            <div class="result-label">Predicted Close</div>
-            <div class="result-value" id="prediction">—</div>
-          </div>
-          <div class="result-card">
-            <div class="result-label">Confidence</div>
-            <div class="result-value" id="confidence">—</div>
-          </div>
-        </div>
-      </section>
-
-  
-
-      <!-- Error Message -->
-      <p id="error" class="error" role="alert"></p>
-
-      <!-- Loading Indicator -->
-      <div id="loading" class="loading" hidden>
-        <div class="loading-spinner"></div>
-        <p>Predicting...</p>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#090d17" />
+  <meta name="description" content="Explore next-day cryptocurrency close estimates from a GRU forecasting model." />
+  <title>CryptoCast | Market Forecast</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
+  <main class="app-shell">
+    <header class="topbar"><a class="brand" href="#top" aria-label="CryptoCast home"><span class="brand-mark">C</span><span>crypto<span class="brand-light">cast</span></span></a><div class="top-status"><span class="status-dot" id="statusDot"></span><span id="statusText">Connecting to forecast engine</span></div></header>
+    <section class="hero" id="top"><div class="eyebrow"><span class="eyebrow-line"></span> MACHINE LEARNING MARKET OUTLOOK</div><h1>See tomorrow<br />through <span>today.</span></h1><p class="hero-copy">A next-day close estimate, shaped by the latest 60 days of market data and a GRU forecasting model.</p></section>
+    <section class="workspace" aria-label="Cryptocurrency forecast">
+      <div class="section-heading"><div><p class="overline">01 / Choose an asset</p><h2>What are you watching?</h2></div><span class="live-tag"><span></span> LIVE DATA</span></div>
+      <div class="crypto-grid" role="group" aria-label="Cryptocurrency selection">
+        <button class="crypto-card" type="button" data-symbol="BTC" aria-pressed="false"><span class="coin-icon bitcoin">₿</span><span class="coin-copy"><strong>Bitcoin</strong><small>BTC</small></span><span class="coin-arrow">↗</span></button>
+        <button class="crypto-card" type="button" data-symbol="ETH" aria-pressed="false"><span class="coin-icon ethereum">◆</span><span class="coin-copy"><strong>Ethereum</strong><small>ETH</small></span><span class="coin-arrow">↗</span></button>
+        <button class="crypto-card" type="button" data-symbol="LTC" aria-pressed="false"><span class="coin-icon litecoin">Ł</span><span class="coin-copy"><strong>Litecoin</strong><small>LTC</small></span><span class="coin-arrow">↗</span></button>
+        <button class="crypto-card" type="button" data-symbol="XRP" aria-pressed="false"><span class="coin-icon ripple">✕</span><span class="coin-copy"><strong>Ripple</strong><small>XRP</small></span><span class="coin-arrow">↗</span></button>
       </div>
-    </main>
-
-    <script src="index.js"></script>
-  </body>
+      <div class="forecast-panel"><div class="forecast-copy"><p class="overline">02 / Generate forecast</p><p class="forecast-hint" id="selectionHint">Choose an asset to get started.</p></div><button class="predict-btn" id="predictBtn" type="button" disabled><span class="button-label">Generate forecast</span><span class="button-arrow">→</span></button></div>
+    </section>
+    <section class="results" aria-live="polite"><div class="section-heading results-heading"><div><p class="overline">03 / Your outlook</p><h2>Forecast results</h2></div><span class="forecast-date" id="forecastDate">NEXT DAY</span></div>
+      <div class="result-grid"><article class="result-card primary-result"><div class="result-topline"><span>Predicted close</span><span class="result-icon">↗</span></div><div class="result-number" id="prediction">—</div><div class="result-foot" id="predictionFoot">USD estimate · next daily close</div></article><article class="result-card confidence-result"><div class="result-topline"><span>Model confidence</span><span class="confidence-icon">◌</span></div><div class="result-number" id="confidence">—</div><div class="confidence-track"><span id="confidenceBar"></span></div><div class="result-foot">Based on recent price volatility</div></article></div>
+      <div class="error-box" id="error" role="alert" hidden></div><div class="loading-box" id="loading" hidden><span class="loading-spinner"></span><span>Reading the latest market data…</span></div>
+    </section>
+    <footer class="footer"><span>Built for exploration. Crypto markets are volatile.</span><span>GRU MODEL <i></i> 60-DAY WINDOW <i></i> NEXT-DAY ESTIMATE</span></footer>
+  </main>
+  <script src="index.js"></script>
+</body>
 </html>

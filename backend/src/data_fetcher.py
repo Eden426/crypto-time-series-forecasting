@@ -1,47 +1,51 @@
-import requests
+from datetime import datetime, timezone
+
 import numpy as np
+import requests
 
 COINGECKO_IDS = {
     "BTC": "bitcoin",
     "ETH": "ethereum",
     "LTC": "litecoin",
-    "XRP": "ripple"
+    "XRP": "ripple",
 }
 
-HEADERS = {
-    "User-Agent": "crypto-prediction-api/1.0"
-}
+HEADERS = {"User-Agent": "crypto-prediction-api/1.0"}
 
-def fetch_last_60_days(symbol: str):
-    """
-    Fetch the last 60 days of OHLC data for a crypto symbol from CoinGecko.
-    Returns:
-        ohlc: np.ndarray of shape (60, 4) [Open, High, Low, Close] (all same as CoinGecko provides only price)
-        dates: list of 60 date strings (YYYY-MM-DD)
-    """
+
+def fetch_last_60_days(symbol: str) -> np.ndarray:
+    """Fetch and aggregate market prices into the model's 60 daily OHLC rows."""
     coin_id = COINGECKO_IDS.get(symbol.upper())
     if not coin_id:
         raise ValueError(f"Unsupported symbol: {symbol}")
 
     url = f"https://api.coingecko.com/api/v3/coins/{coin_id}/market_chart"
-    params = {
-        "vs_currency": "usd",
-        "days": 60
-    }
+    response = requests.get(
+        url,
+        params={"vs_currency": "usd", "days": 90},
+        headers=HEADERS,
+        timeout=20,
+    )
+    if response.status_code != 200:
+        raise RuntimeError(
+            f"Market data provider returned HTTP {response.status_code}. Please retry later."
+        )
 
-    r = requests.get(url, params=params, headers=HEADERS, timeout=10)
-    if r.status_code != 200:
-        raise RuntimeError("Market data temporarily unavailable")
+    prices = response.json().get("prices", [])
+    daily_prices: dict[str, list[float]] = {}
+    for timestamp_ms, price in prices:
+        day = datetime.fromtimestamp(timestamp_ms / 1000, tz=timezone.utc).date().isoformat()
+        daily_prices.setdefault(day, []).append(float(price))
 
-    data = r.json()
-    prices = data.get("prices", [])[-60:]
-
-    if len(prices) < 60:
-        raise RuntimeError("Not enough data points")
-
-    # OHLC array (CoinGecko provides only prices, so we copy to OHLC)
-    ohlc = np.array([[p[1], p[1], p[1], p[1]] for p in prices])
-
-
-
-    return ohlc
+    rows = [
+        [values[0], max(values), min(values), values[-1]]
+        for _, values in sorted(daily_prices.items())
+    ][-60:]
+    if len(rows) < 60:
+        raise RuntimeError(
+            f"Market data provider returned only {len(rows)} daily points; 60 are required."
+        )
+    result = np.asarray(rows, dtype=np.float64)
+    if result.shape != (60, 4) or not np.isfinite(result).all():
+        raise RuntimeError("Market data provider returned invalid price data.")
+    return result
