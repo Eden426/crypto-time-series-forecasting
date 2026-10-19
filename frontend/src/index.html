@@ -27,8 +27,15 @@
       <div class="forecast-panel"><div class="forecast-copy"><p class="overline">02 / Generate forecast</p><p class="forecast-hint" id="selectionHint">Choose an asset to get started.</p></div><button class="predict-btn" id="predictBtn" type="button" disabled><span class="button-label">Generate forecast</span><span class="button-arrow">→</span></button></div>
     </section>
     <section class="results" aria-live="polite"><div class="section-heading results-heading"><div><p class="overline">03 / Your outlook</p><h2>Forecast results</h2></div><span class="forecast-date" id="forecastDate">NEXT DAY</span></div>
-      <div class="result-grid"><article class="result-card primary-result"><div class="result-topline"><span>Predicted close</span><span class="result-icon">↗</span></div><div class="result-number" id="prediction">—</div><div class="result-foot" id="predictionFoot">USD estimate · next daily close</div></article><article class="result-card confidence-result"><div class="result-topline"><span>Model confidence</span><span class="confidence-icon">◌</span></div><div class="result-number" id="confidence">—</div><div class="confidence-track"><span id="confidenceBar"></span></div><div class="result-foot">Based on recent price volatility</div></article></div>
+      <div class="result-grid"><article class="result-card primary-result"><div class="result-topline"><span>Predicted close</span><span class="result-icon">↗</span></div><div class="result-number" id="prediction">—</div><div class="result-foot" id="predictionFoot">USD estimate · next daily close</div></article><article class="result-card confidence-result"><div class="result-topline"><span>Confidence score</span><span class="confidence-icon">◌</span></div><div class="result-number" id="confidence">—</div><div class="confidence-track"><span id="confidenceBar"></span></div><div class="result-foot">Volatility-based indicator; not a probability of accuracy</div></article></div>
       <div class="error-box" id="error" role="alert" hidden></div><div class="loading-box" id="loading" hidden><span class="loading-spinner"></span><span>Reading the latest market data…</span></div>
+    </section>
+    <section class="chart-card" id="chartSection" aria-label="Price history and forecast" hidden>
+      <div class="chart-heading"><div><p class="overline">04 / Price path</p><h2>History & next-day estimate</h2></div><div class="chart-legend"><span><i class="legend-history"></i>Daily close</span><span><i class="legend-forecast"></i>Forecast</span></div></div>
+      <div class="chart-summary"><strong id="chartAsset">—</strong><span>Last 30 daily closes</span></div>
+      <div class="chart-viewport"><svg id="priceChart" viewBox="0 0 800 280" role="img" aria-label="Price history and forecast chart"></svg></div>
+      <div class="chart-axis"><span>30 days ago</span><span>Today</span><span>Tomorrow</span></div>
+      <p class="chart-note">Historical closes are shown in USD. The dotted segment connects today’s close to the model estimate.</p>
     </section>
     <footer class="footer"><span>Built for exploration. Crypto markets are volatile.</span><span>GRU MODEL <i></i> 60-DAY WINDOW <i></i> NEXT-DAY ESTIMATE</span></footer>
   </main>

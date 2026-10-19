@@ -47,6 +47,7 @@ def predict_crypto(request: PredictedRequest):
             symbol=symbol,
             predicted_close=round(predicted, 2),
             confidence=confidence,
+            history=[round(float(price), 8) for price in daily_ohlc[-30:, 3]],
             description=f"Next-day close prediction for {symbol}",
         )
     except Exception as exc:
