@@ -3,42 +3,151 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#090d17" />
-  <meta name="description" content="Explore next-day cryptocurrency close estimates from a GRU forecasting model." />
-  <title>CryptoCast | Market Forecast</title>
+  <meta name="theme-color" content="#e8f0f4" />
+  <meta name="description" content="Meridian forecasts the next-day close from sixty days of market history using a GRU model." />
+  <title>Meridian — Next-Day Close Forecast</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
-  <main class="app-shell">
-    <header class="topbar"><a class="brand" href="#top" aria-label="CryptoCast home"><span class="brand-mark">C</span><span>crypto<span class="brand-light">cast</span></span></a><div class="top-status"><span class="status-dot" id="statusDot"></span><span id="statusText">Connecting to forecast engine</span></div></header>
-    <section class="hero" id="top"><div class="eyebrow"><span class="eyebrow-line"></span> MACHINE LEARNING MARKET OUTLOOK</div><h1>See tomorrow<br />through <span>today.</span></h1><p class="hero-copy">A next-day close estimate, shaped by the latest 60 days of market data and a GRU forecasting model.</p></section>
-    <section class="workspace" aria-label="Cryptocurrency forecast">
-      <div class="section-heading"><div><p class="overline">01 / Choose an asset</p><h2>What are you watching?</h2></div><span class="live-tag"><span></span> LIVE DATA</span></div>
-      <div class="crypto-grid" role="group" aria-label="Cryptocurrency selection">
-        <button class="crypto-card" type="button" data-symbol="BTC" aria-pressed="false"><span class="coin-icon bitcoin">₿</span><span class="coin-copy"><strong>Bitcoin</strong><small>BTC</small></span><span class="coin-arrow">↗</span></button>
-        <button class="crypto-card" type="button" data-symbol="ETH" aria-pressed="false"><span class="coin-icon ethereum">◆</span><span class="coin-copy"><strong>Ethereum</strong><small>ETH</small></span><span class="coin-arrow">↗</span></button>
-        <button class="crypto-card" type="button" data-symbol="LTC" aria-pressed="false"><span class="coin-icon litecoin">Ł</span><span class="coin-copy"><strong>Litecoin</strong><small>LTC</small></span><span class="coin-arrow">↗</span></button>
-        <button class="crypto-card" type="button" data-symbol="XRP" aria-pressed="false"><span class="coin-icon ripple">✕</span><span class="coin-copy"><strong>Ripple</strong><small>XRP</small></span><span class="coin-arrow">↗</span></button>
+  <div class="sky" aria-hidden="true">
+    <svg class="sky-wave" viewBox="0 0 1440 520" preserveAspectRatio="none">
+      <path class="wave-a" d="M0,320 C180,260 320,380 520,300 C720,220 880,160 1080,220 C1240,268 1360,300 1440,280 L1440,520 L0,520 Z" />
+      <path class="wave-b" d="M0,360 C220,300 400,420 620,340 C840,260 980,200 1180,260 C1320,300 1400,320 1440,310 L1440,520 L0,520 Z" />
+    </svg>
+  </div>
+
+  <header class="site-header">
+    <a class="brand" href="#top" aria-label="Meridian home">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 32 32" fill="none">
+          <circle cx="16" cy="16" r="13" stroke="currentColor" stroke-width="1.5" />
+          <path d="M16 5v22" stroke="currentColor" stroke-width="1.5" />
+          <path d="M5 16h22" stroke="currentColor" stroke-width="1" opacity=".35" />
+        </svg>
+      </span>
+      <span class="brand-name">Meridian</span>
+    </a>
+    <div class="engine-status" id="engineStatus">
+      <span class="status-dot" id="statusDot"></span>
+      <span id="statusText">Connecting</span>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <p class="eyebrow">Next-day close · GRU · 60-day window</p>
+      <h1>Tomorrow’s close,<br />drawn from<br /><em>today’s path.</em></h1>
+      <p class="hero-lede">Meridian reads the last sixty daily closes and estimates the next one — for Bitcoin, Ethereum, Litecoin, and Ripple.</p>
+      <svg class="horizon" viewBox="0 0 640 88" aria-hidden="true">
+        <path class="horizon-past" d="M0 58 C40 52 72 66 110 48 C148 30 180 42 220 36 C260 30 292 50 332 44 C372 38 404 20 448 28" />
+        <path class="horizon-future" d="M448 28 C500 38 560 18 640 12" />
+        <circle cx="448" cy="28" r="4.5" class="horizon-now" />
+        <circle cx="640" cy="12" r="4.5" class="horizon-next" />
+        <text x="430" y="78">today</text>
+        <text x="592" y="78">tomorrow</text>
+      </svg>
+      <div class="hero-actions">
+        <a class="cta-primary" href="#workspace">Open forecast</a>
+        <span class="cta-note">USD close estimate · not financial advice</span>
       </div>
-      <div class="forecast-panel"><div class="forecast-copy"><p class="overline">02 / Generate forecast</p><p class="forecast-hint" id="selectionHint">Choose an asset to get started.</p></div><button class="predict-btn" id="predictBtn" type="button" disabled><span class="button-label">Generate forecast</span><span class="button-arrow">→</span></button></div>
     </section>
-    <section class="results" aria-live="polite"><div class="section-heading results-heading"><div><p class="overline">03 / Your outlook</p><h2>Forecast results</h2></div><span class="forecast-date" id="forecastDate">NEXT DAY</span></div>
-      <div class="result-grid"><article class="result-card primary-result"><div class="result-topline"><span>Predicted close</span><span class="result-icon">↗</span></div><div class="result-number" id="prediction">—</div><div class="result-foot" id="predictionFoot">USD estimate · next daily close</div></article><article class="result-card confidence-result"><div class="result-topline"><span>Confidence score</span><span class="confidence-icon">◌</span></div><div class="result-number" id="confidence">—</div><div class="confidence-track"><span id="confidenceBar"></span></div><div class="result-foot">Volatility-based indicator; not a probability of accuracy</div></article></div>
-      <div class="error-box" id="error" role="alert" hidden></div><div class="loading-box" id="loading" hidden><span class="loading-spinner"></span><span>Reading the latest market data…</span></div>
+
+    <section class="workspace" id="workspace" aria-label="Forecast workspace">
+      <div class="workspace-intro">
+        <h2>Pick an asset</h2>
+        <p>Select a cryptocurrency, then generate a next-day close estimate.</p>
+      </div>
+
+      <div class="asset-row" role="group" aria-label="Cryptocurrency selection">
+        <button class="asset" type="button" data-symbol="BTC" aria-pressed="false">
+          <span class="asset-mark bitcoin">₿</span>
+          <span class="asset-ticker">BTC</span>
+          <span class="asset-name">Bitcoin</span>
+        </button>
+        <button class="asset" type="button" data-symbol="ETH" aria-pressed="false">
+          <span class="asset-mark ethereum">Ξ</span>
+          <span class="asset-ticker">ETH</span>
+          <span class="asset-name">Ethereum</span>
+        </button>
+        <button class="asset" type="button" data-symbol="LTC" aria-pressed="false">
+          <span class="asset-mark litecoin">Ł</span>
+          <span class="asset-ticker">LTC</span>
+          <span class="asset-name">Litecoin</span>
+        </button>
+        <button class="asset" type="button" data-symbol="XRP" aria-pressed="false">
+          <span class="asset-mark ripple">✕</span>
+          <span class="asset-ticker">XRP</span>
+          <span class="asset-name">Ripple</span>
+        </button>
+      </div>
+
+      <div class="run-bar">
+        <p class="selection-hint" id="selectionHint">Choose an asset to begin.</p>
+        <button class="run-btn" id="predictBtn" type="button" disabled>
+          Generate forecast
+          <span aria-hidden="true">→</span>
+        </button>
+      </div>
     </section>
-    <section class="chart-card" id="chartSection" aria-label="Price history and forecast" hidden>
-      <div class="chart-heading"><div><p class="overline">04 / Price path</p><h2>History & next-day estimate</h2></div><div class="chart-legend"><span><i class="legend-history"></i>Daily close</span><span><i class="legend-forecast"></i>Forecast</span></div></div>
-      <div class="chart-summary"><strong id="chartAsset">—</strong><span>Last 30 daily closes</span></div>
-      <div class="chart-viewport"><svg id="priceChart" viewBox="0 0 800 280" role="img" aria-label="Price history and forecast chart"></svg></div>
-      <div class="chart-axis"><span>30 days ago</span><span>Today</span><span>Tomorrow</span></div>
-      <p class="chart-note">Historical closes are shown in USD. The dotted segment connects today’s close to the model estimate.</p>
+
+    <section class="outlook" id="outlook" aria-live="polite" hidden>
+      <div class="outlook-head">
+        <h2>Outlook</h2>
+        <span class="horizon-tag" id="forecastDate">Next day</span>
+      </div>
+
+      <div class="readout">
+        <div class="readout-block">
+          <span class="readout-label">Predicted close</span>
+          <p class="readout-value" id="prediction">—</p>
+          <p class="readout-meta" id="predictionFoot">USD · next daily close</p>
+        </div>
+        <div class="readout-block">
+          <span class="readout-label">Confidence</span>
+          <p class="readout-value" id="confidence">—</p>
+          <div class="confidence-track" aria-hidden="true"><span id="confidenceBar"></span></div>
+          <p class="readout-meta">Volatility-based indicator — not accuracy odds</p>
+        </div>
+      </div>
+
+      <div class="error-box" id="error" role="alert" hidden></div>
+      <div class="loading-box" id="loading" hidden>
+        <span class="loading-spinner" aria-hidden="true"></span>
+        <span>Reading the latest market data…</span>
+      </div>
     </section>
-    <footer class="footer"><span>Built for exploration. Crypto markets are volatile.</span><span>GRU MODEL <i></i> 60-DAY WINDOW <i></i> NEXT-DAY ESTIMATE</span></footer>
+
+    <section class="path" id="chartSection" aria-label="Price history and forecast" hidden>
+      <div class="path-head">
+        <div>
+          <h2>Price path</h2>
+          <p class="path-sub"><strong id="chartAsset">—</strong> · last 30 daily closes</p>
+        </div>
+        <div class="path-legend">
+          <span><i class="legend-history"></i>Daily close</span>
+          <span><i class="legend-forecast"></i>Forecast</span>
+        </div>
+      </div>
+      <div class="chart-viewport">
+        <svg id="priceChart" viewBox="0 0 800 280" role="img" aria-label="Price history and forecast chart"></svg>
+      </div>
+      <div class="chart-axis">
+        <span>30 days ago</span>
+        <span>Today</span>
+        <span>Tomorrow</span>
+      </div>
+      <p class="chart-note">Historical closes in USD. The dashed segment links today’s close to the model estimate.</p>
+    </section>
   </main>
+
+  <footer class="site-footer">
+    <span>Built for exploration. Markets move fast.</span>
+    <span>GRU · 60-day window · next-day estimate</span>
+  </footer>
+
   <script src="index.js"></script>
 </body>
 </html>
