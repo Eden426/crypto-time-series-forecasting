@@ -3,130 +3,53 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#e8f0f4" />
-  <meta name="description" content="Meridian forecasts the next-day close from sixty days of market history using a GRU model." />
-  <title>Meridian — Next-Day Close Forecast</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet" />
+  <meta name="theme-color" content="#f4f7f6" />
+  <meta name="description" content="Explore next-day cryptocurrency close estimates from 60 days of market data with Meridian." />
+  <title>Meridian | Crypto forecast</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <a class="skip-link" href="#workspace">Skip to forecast</a>
   <header class="site-header">
-    <a class="brand" href="#top" aria-label="Meridian home">
-      <span class="brand-mark" aria-hidden="true">
-        <svg viewBox="0 0 32 32" fill="none">
-          <circle cx="16" cy="16" r="13" stroke="currentColor" stroke-width="1.5" />
-          <path d="M16 5v22" stroke="currentColor" stroke-width="1.5" />
-          <path d="M5 16h22" stroke="currentColor" stroke-width="1" opacity=".35" />
-        </svg>
-      </span>
-      <span class="brand-name">Meridian</span>
-    </a>
-    <div class="engine-status" id="engineStatus">
-      <span class="status-dot" id="statusDot"></span>
-      <span id="statusText">Connecting</span>
-    </div>
+    <a class="brand" href="#top" aria-label="Meridian home">Meridian<span class="brand-caption">Crypto forecasting</span></a>
+    <div class="engine-status" id="engineStatus" role="status"><span class="status-dot" aria-hidden="true"></span><span id="statusText">Connecting…</span></div>
   </header>
-
   <main id="top">
-    <section class="page-intro" aria-labelledby="pageTitle">
-      <h1 id="pageTitle">Crypto forecast</h1>
-      <p>Choose a coin to estimate its next daily close.</p>
-    </section>
-
-    <section class="workspace" id="workspace" aria-label="Forecast workspace">
-      <div class="workspace-intro">
-        <h2>1. Select a cryptocurrency</h2>
-      </div>
-
-      <div class="asset-row" role="group" aria-label="Cryptocurrency selection">
-        <button class="asset" type="button" data-symbol="BTC" aria-pressed="false">
-          <span class="asset-mark bitcoin">₿</span>
-          <span class="asset-ticker">BTC</span>
-          <span class="asset-name">Bitcoin</span>
-        </button>
-        <button class="asset" type="button" data-symbol="ETH" aria-pressed="false">
-          <span class="asset-mark ethereum">Ξ</span>
-          <span class="asset-ticker">ETH</span>
-          <span class="asset-name">Ethereum</span>
-        </button>
-        <button class="asset" type="button" data-symbol="LTC" aria-pressed="false">
-          <span class="asset-mark litecoin">Ł</span>
-          <span class="asset-ticker">LTC</span>
-          <span class="asset-name">Litecoin</span>
-        </button>
-        <button class="asset" type="button" data-symbol="XRP" aria-pressed="false">
-          <span class="asset-mark ripple">✕</span>
-          <span class="asset-ticker">XRP</span>
-          <span class="asset-name">Ripple</span>
-        </button>
-      </div>
-
-      <div class="run-bar">
-        <p class="selection-hint" id="selectionHint">Choose an asset to continue.</p>
-        <button class="run-btn" id="predictBtn" type="button" disabled>
-          Get forecast
-          <span aria-hidden="true">→</span>
-        </button>
-      </div>
-    </section>
-
-    <section class="outlook" id="outlook" aria-live="polite" hidden>
-      <div class="outlook-head">
-        <h2>Outlook</h2>
-        <span class="horizon-tag" id="forecastDate">Next day</span>
-      </div>
-
-      <div class="readout">
-        <div class="readout-block">
-          <span class="readout-label">Predicted close</span>
-          <p class="readout-value" id="prediction">—</p>
-          <p class="readout-meta" id="predictionFoot">USD · next daily close</p>
+    <div class="page-intro"><p class="eyebrow">A little perspective on what comes next</p><h1>Your next-day crypto forecast.</h1><p>Choose a coin. Get an estimate. Explore the price history behind it.</p></div>
+    <div class="forecast-layout">
+      <section class="workspace panel" id="workspace" aria-labelledby="selectionTitle" tabindex="-1">
+        <div class="panel-heading"><span class="step-number" aria-hidden="true">01</span><h2 id="selectionTitle">Choose your coin</h2></div>
+        <div class="asset-row" role="group" aria-label="Cryptocurrency selection">
+          <button class="asset" type="button" data-symbol="BTC" aria-pressed="true"><span class="asset-mark bitcoin" aria-hidden="true">₿</span><span class="asset-name">Bitcoin</span><span class="asset-ticker">BTC</span><span class="selected-label" aria-hidden="true">Selected</span></button>
+          <button class="asset" type="button" data-symbol="ETH" aria-pressed="false"><span class="asset-mark ethereum" aria-hidden="true">Ξ</span><span class="asset-name">Ethereum</span><span class="asset-ticker">ETH</span><span class="selected-label" aria-hidden="true">Selected</span></button>
+          <button class="asset" type="button" data-symbol="LTC" aria-pressed="false"><span class="asset-mark litecoin" aria-hidden="true">Ł</span><span class="asset-name">Litecoin</span><span class="asset-ticker">LTC</span><span class="selected-label" aria-hidden="true">Selected</span></button>
+          <button class="asset" type="button" data-symbol="XRP" aria-pressed="false"><span class="asset-mark ripple" aria-hidden="true">✕</span><span class="asset-name">XRP</span><span class="asset-ticker">XRP</span><span class="selected-label" aria-hidden="true">Selected</span></button>
         </div>
-        <div class="readout-block">
-          <span class="readout-label">Confidence</span>
-          <p class="readout-value" id="confidence">—</p>
-          <div class="confidence-track" aria-hidden="true"><span id="confidenceBar"></span></div>
-          <p class="readout-meta">Volatility-based indicator — not accuracy odds</p>
+        <p class="selection-hint" id="selectionHint">Bitcoin selected. Ready to explore?</p>
+        <button class="run-btn" id="predictBtn" type="button" aria-describedby="selectionHint">Generate Bitcoin forecast</button>
+        <p class="run-note">Uses 60 days of market history.<br />First forecast may take up to a minute.</p>
+      </section>
+      <section class="outlook panel" id="outlook" aria-labelledby="outlookTitle" aria-busy="false">
+        <div class="outlook-head"><div class="panel-heading"><span class="step-number" aria-hidden="true">02</span><h2 id="outlookTitle">Bitcoin outlook</h2></div><span class="horizon-tag">Next daily close · USD</span></div>
+        <div class="empty-state" id="emptyState"><p class="empty-title">Your forecast starts here.</p><p>Generate a forecast to see the estimated closing price and how it compares with the latest recorded close.</p><span class="empty-note">No forecast generated yet</span></div>
+        <div class="loading-box" id="loading" role="status" hidden><span class="loading-spinner" aria-hidden="true"></span><div><strong>Preparing your forecast…</strong><p id="loadingText">Reading recent market data and running the model.</p></div></div>
+        <div class="error-box" id="errorBox" hidden><p class="error-title">We couldn’t generate this forecast.</p><p id="error" role="alert"></p><button class="retry-btn" id="retryBtn" type="button">Try again</button><details class="error-details"><summary>Technical details</summary><pre id="errorDetails"></pre></details></div>
+        <div id="readout" hidden>
+          <div class="primary-readout"><p class="readout-label">Estimated next close</p><p class="readout-value" id="prediction">—</p><p class="readout-meta" id="predictionFoot">Bitcoin · USD</p><p class="change" id="priceChange" hidden></p></div>
+          <div class="secondary-readouts"><div><p class="readout-label">Latest recorded close</p><p class="secondary-value" id="lastClose">—</p></div><div><p class="readout-label">Confidence indicator</p><p class="secondary-value" id="confidence">—</p><div class="confidence-track" aria-hidden="true"><span id="confidenceBar"></span></div></div></div>
+          <p class="confidence-note">Confidence reflects recent volatility, not the probability that the forecast is correct.</p><p class="updated" id="forecastUpdated"></p>
         </div>
-      </div>
-
-      <div class="error-box" id="error" role="alert" hidden></div>
-      <div class="loading-box" id="loading" hidden>
-        <span class="loading-spinner" aria-hidden="true"></span>
-        <span>Reading the latest market data…</span>
-      </div>
+        <p class="sr-only" id="forecastAnnouncement" role="status" aria-live="polite"></p>
+      </section>
+    </div>
+    <section class="path panel" id="chartSection" aria-labelledby="chartTitle" hidden>
+      <div class="path-head"><div><h2 id="chartTitle">Recent price history &amp; forecast</h2><p class="path-sub" id="chartAsset"></p></div><div class="path-legend" aria-hidden="true"><span><i class="legend-history"></i>Daily close</span><span><i class="legend-forecast"></i>Estimate</span></div></div>
+      <div class="chart-viewport"><svg id="priceChart" role="img" aria-label="Price history and next-day estimate"></svg></div>
+      <p class="chart-note">The dashed line connects the latest recorded close to the next-day estimate. All prices are in USD.</p>
     </section>
-
-    <section class="path" id="chartSection" aria-label="Price history and forecast" hidden>
-      <div class="path-head">
-        <div>
-          <h2>Price path</h2>
-          <p class="path-sub"><strong id="chartAsset">—</strong> · last 30 daily closes</p>
-        </div>
-        <div class="path-legend">
-          <span><i class="legend-history"></i>Daily close</span>
-          <span><i class="legend-forecast"></i>Forecast</span>
-        </div>
-      </div>
-      <div class="chart-viewport">
-        <svg id="priceChart" viewBox="0 0 800 280" role="img" aria-label="Price history and forecast chart"></svg>
-      </div>
-      <div class="chart-axis">
-        <span>30 days ago</span>
-        <span>Today</span>
-        <span>Tomorrow</span>
-      </div>
-      <p class="chart-note">Historical closes in USD. The dashed segment links today’s close to the model estimate.</p>
-    </section>
+    <details class="how-it-works"><summary>How should I read this forecast?</summary><div><p>The model looks at 60 days of open, high, low, and close prices to estimate the next daily close. The chart shows up to 30 recent closing prices.</p><p>The confidence indicator is calculated from recent volatility. It is not a measure of prediction accuracy. Market conditions can change quickly, and forecasts can be wrong.</p></div></details>
   </main>
-
-  <footer class="site-footer">
-    <span>Built for exploration. Markets move fast.</span>
-    <span>GRU · 60-day window · next-day estimate</span>
-  </footer>
-
+  <footer class="site-footer"><span>Meridian · A machine learning course project</span><span>For learning and exploration. Not financial advice.</span></footer>
   <script src="index.js"></script>
 </body>
 </html>

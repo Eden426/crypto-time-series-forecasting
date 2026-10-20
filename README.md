@@ -202,24 +202,40 @@ All dependencies can be installed using pip and the provided requirements files.
 
 
 ## Running the Project
-### Backend
+### Frontend and API together
+
+Live application: https://crypto-time-series-forecasting.onrender.com
+
+The Render container serves the frontend at `/` and the API at `/predict`.
+The page uses the API on the same origin. `/health` reports service health and
+the deployed Git revision, and `/api/config` configures the frontend connection.
+Static assets revalidate on each visit so the browser receives the latest build.
+
+To run from the repository root:
 
 ```bash
-cd backend
 python -m venv venv
 source venv/bin/activate   # Windows: venv\Scripts\activate
-uvicorn src.main:app --reload
+pip install -r backend/requirements.txt
+uvicorn backend.src.main:app --reload
 ```
 
-### Frontend
+Open `http://127.0.0.1:8000` to use the app.
 
-Open directly in browser:
+### Standalone frontend preview
 
+```bash
+python -m http.server 5173 --directory frontend/src
 ```
-frontend/src/index.html
-```
 
-Ensure backend is running before prediction.
+Open `http://127.0.0.1:5173`. The frontend tries the local API first, then the
+deployed API if the local service is unavailable. Existing Vercel deployments
+can continue to use `CRYPTO_API_URL` through `frontend/src/api/config.js`.
+
+The interface includes keyboard coin selection, visible focus outlines, a skip
+link, loading feedback, retryable errors, and a chart that resizes for small
+screens. The confidence indicator describes volatility; it is not a probability
+of forecast accuracy.
 
 ---
 
